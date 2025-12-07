@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api")
@@ -26,11 +27,12 @@ public class UserProductController {
 	@Operation(summary = "Get product list", description = "Returns paginated list of products. Optional filters: category (slug) and keyword.")
 	@ApiResponse(responseCode = "200", description = "Paged product list", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class)))
 	@GetMapping("/products")
+   @PreAuthorize("hasRole('USER')")
 	public ResponseEntity<PagedResponse<ProductDto>> listProducts(
-			@Parameter(description = "Category slug to filter") @RequestParam(required = false) String category,
-			@Parameter(description = "Keyword to search in name, description or sku") @RequestParam(required = false) String keyword,
-			@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-			@Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
+		@Parameter(description = "Category slug to filter") @RequestParam(required = false) String category,
+		@Parameter(description = "Keyword to search in name, description or sku") @RequestParam(required = false) String keyword,
+		@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+		@Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size
 	) {
 		if (page < 0) {
 			return ResponseEntity.badRequest().build();
@@ -39,6 +41,17 @@ public class UserProductController {
 			return ResponseEntity.badRequest().build();
 		}
 		PagedResponse<ProductDto> resp = productLogic.getProducts(category, keyword, page, size);
+		return ResponseEntity.ok(resp);
+	}
+
+	@Operation(summary = "Get product detail by id")
+	@ApiResponse(responseCode = "200", description = "Product detail", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductDto.class)))
+	@GetMapping("/product/{id}")
+   @PreAuthorize("hasRole('USER')")
+	public ResponseEntity<ProductDto> productDetail(
+		@PathVariable Long id
+	) {
+		ProductDto resp = productLogic.getProductById(id);
 		return ResponseEntity.ok(resp);
 	}
 }

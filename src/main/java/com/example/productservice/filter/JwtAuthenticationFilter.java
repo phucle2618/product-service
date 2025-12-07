@@ -38,10 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String jwt = Jwts.builder()
                   .setSubject("phuc")
-                  .claim("userType", "USER")
+                  .claim("userType", "ADMIN")
                   .claim("userId", 1)
                   .setIssuedAt(new Date())
-                  .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 giờ
+                  .setExpiration(new Date(System.currentTimeMillis() + 36000_000)) // 1 giờ
                   .signWith(key)
                   .compact();
 
